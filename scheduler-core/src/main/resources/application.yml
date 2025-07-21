@@ -1,0 +1,96 @@
+# Noah Backup Scheduler Configuration
+
+# Application settings
+server:
+  port: 8080
+  
+spring:
+  application:
+    name: noah-backup-scheduler
+  profiles:
+    active: development
+    
+# Noah Backup Configuration
+noah:
+  backup:
+    # Global scheduling settings
+    enabled: true
+    weekly-enabled: true
+    timeout-minutes: 60
+    bucket: noah-backup-default
+    
+    # Backup paths - customize these for your environment
+    paths:
+      - "C:\\Users\\%USERNAME%\\Documents"
+      - "C:\\Users\\%USERNAME%\\Desktop"
+      - "C:\\Users\\%USERNAME%\\AppData\\Local\\Microsoft\\Outlook"
+      # Add more paths as needed
+      
+    # Cron schedule expressions (Spring format)
+    schedule:
+      # Daily backup at 2:00 AM
+      daily: "0 0 2 * * ?"
+      # Weekly backup at 1:00 AM every Sunday  
+      weekly: "0 0 1 * * SUN"
+
+# Logging configuration
+logging:
+  level:
+    com.noahbackup: DEBUG
+    org.springframework.scheduling: INFO
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: logs/noah-backup-scheduler.log
+    
+# Actuator for monitoring (optional)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,scheduledtasks
+  endpoint:
+    health:
+      show-details: when-authorized
+
+---
+# Development profile
+spring:
+  config:
+    activate:
+      on-profile: development
+      
+noah:
+  backup:
+    # Development settings - shorter intervals for testing
+    schedule:
+      # Every 5 minutes for testing
+      daily: "0 */5 * * * ?"
+      # Every 10 minutes for testing  
+      weekly: "0 */10 * * * ?"
+    paths:
+      - "C:\\temp\\test-backup"
+      - "C:\\Users\\%USERNAME%\\Documents\\TestFiles"
+
+---
+# Production profile
+spring:
+  config:
+    activate:
+      on-profile: production
+      
+noah:
+  backup:
+    # Production settings
+    timeout-minutes: 120
+    schedule:
+      # 2:00 AM daily
+      daily: "0 0 2 * * ?"
+      # 1:00 AM every Sunday
+      weekly: "0 0 1 * * SUN"
+    paths:
+      # Production backup paths
+      - "C:\\Users"
+      - "C:\\ProgramData"
+      - "D:\\Data"

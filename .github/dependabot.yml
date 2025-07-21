@@ -1,0 +1,80 @@
+# Dependabot configuration for Noah Backup
+# Automatically update dependencies to maintain security
+
+version: 2
+
+updates:
+  # Java/Gradle dependencies
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "security-team"
+    assignees:
+      - "lead-developer"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "security"
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    groups:
+      spring:
+        patterns:
+          - "org.springframework*"
+          - "org.springframework.boot*"
+          - "org.springframework.security*"
+      jackson:
+        patterns:
+          - "com.fasterxml.jackson*"
+      testing:
+        patterns:
+          - "*junit*"
+          - "*mockito*"
+          - "*testcontainers*"
+      security:
+        patterns:
+          - "*security*"
+          - "*crypto*"
+          - "*bouncycastle*"
+          - "io.jsonwebtoken*"
+
+  # GitHub Actions dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "04:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "devops-team"
+    commit-message:
+      prefix: "ci"
+    labels:
+      - "github-actions"
+      - "ci-cd"
+
+  # Docker dependencies
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "04:00"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "devops-team"
+    commit-message:
+      prefix: "docker"
+    labels:
+      - "docker"
+      - "infrastructure"

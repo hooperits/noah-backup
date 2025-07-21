@@ -1,0 +1,85 @@
+# Noah Backup Demo Application Configuration
+
+server:
+  port: 8080
+
+spring:
+  application:
+    name: noah-backup-demo
+  profiles:
+    active: demo
+
+# Demo configuration for Noah Backup
+noah:
+  backup:
+    enabled: true
+    weekly-enabled: true
+    timeout-minutes: 30
+    bucket: noah-backup-demo
+    
+    # Demo backup paths - customize these for your environment
+    paths:
+      - "C:\\temp\\demo-backup"
+      # Add more realistic paths for actual testing:
+      # - "C:\\Users\\%USERNAME%\\Documents\\TestFiles"
+      # - "C:\\Users\\%USERNAME%\\Desktop\\ImportantFiles"
+      
+    # Demo schedule - more frequent for testing
+    schedule:
+      # Every 30 minutes for demo
+      daily: "0 */30 * * * ?"
+      # Every hour for weekly demo
+      weekly: "0 0 */1 * * ?"
+
+# Logging for demo
+logging:
+  level:
+    com.noahbackup: INFO
+    org.springframework.scheduling: INFO
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# Actuator endpoints for monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,scheduledtasks,metrics
+  endpoint:
+    health:
+      show-details: always
+  info:
+    env:
+      enabled: true
+
+# Application info
+info:
+  app:
+    name: Noah Backup Demo
+    description: Enterprise backup solution with VSS support and S3-compatible storage
+    version: 1.0.0
+    features:
+      - VSS Integration (Windows)
+      - S3-Compatible Storage
+      - Automated Scheduling
+      - RESTful API
+      - Health Monitoring
+
+---
+# Production-like profile for actual testing
+spring:
+  config:
+    activate:
+      on-profile: production-demo
+
+noah:
+  backup:
+    timeout-minutes: 60
+    schedule:
+      # Realistic production schedule
+      daily: "0 0 2 * * ?"    # 2:00 AM daily
+      weekly: "0 0 1 * * SUN" # 1:00 AM Sunday
+    paths:
+      # Production-like backup paths
+      - "C:\\Users\\%USERNAME%\\Documents"
+      - "C:\\Users\\%USERNAME%\\AppData\\Local\\Microsoft\\Outlook"

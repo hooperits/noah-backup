@@ -1,0 +1,348 @@
+name: Noah Backup - Continuous Integration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run nightly builds at 2 AM UTC
+    - cron: '0 2 * * *'
+
+env:
+  JAVA_VERSION: '17'
+  GRADLE_VERSION: '8.8'
+  NODE_VERSION: '18'
+
+jobs:
+  # Security and Code Quality Checks
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: ${{ env.GRADLE_VERSION }}
+
+      - name: Run dependency vulnerability scan
+        run: ./gradlew dependencyCheckAnalyze
+
+      - name: OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'noah-backup'
+          path: '.'
+          format: 'ALL'
+          args: >
+            --enableRetired
+            --enableExperimental
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
+
+      - name: Upload OWASP Dependency Check results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: dependency-check-report
+          path: reports/
+
+      - name: SonarCloud Scan
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: CodeQL Analysis
+        uses: github/codeql-action/init@v3
+        with:
+          languages: java
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  # Unit and Integration Tests
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java-version: [17, 21]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: ${{ env.GRADLE_VERSION }}
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Run unit tests
+        run: ./gradlew test --continue
+
+      - name: Run integration tests
+        run: ./gradlew integrationTest --continue
+
+      - name: Generate test report
+        run: ./gradlew testReport
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-results-${{ matrix.java-version }}
+          path: |
+            **/build/test-results/
+            **/build/reports/tests/
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./build/reports/jacoco/test/jacocoTestReport.xml
+          name: noah-backup-coverage
+          fail_ci_if_error: true
+
+  # Build and Package
+  build:
+    name: Build and Package
+    runs-on: ubuntu-latest
+    needs: [security-scan, test]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: ${{ env.GRADLE_VERSION }}
+
+      - name: Build application
+        run: ./gradlew build -x test
+
+      - name: Build Docker images
+        run: |
+          ./gradlew bootBuildImage
+          docker tag noah-backup:latest noah-backup:${{ github.sha }}
+
+      - name: Run Docker security scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'noah-backup:latest'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: noah-backup-jar
+          path: |
+            **/build/libs/*.jar
+            !**/build/libs/*-plain.jar
+
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push Docker images
+        if: github.event_name != 'pull_request'
+        run: |
+          docker tag noah-backup:latest ${{ secrets.DOCKER_USERNAME }}/noah-backup:latest
+          docker tag noah-backup:latest ${{ secrets.DOCKER_USERNAME }}/noah-backup:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/noah-backup:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/noah-backup:${{ github.sha }}
+
+  # Performance Testing
+  performance-test:
+    name: Performance Testing
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.event_name != 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: noah-backup-jar
+          path: ./artifacts
+
+      - name: Start application for testing
+        run: |
+          java -jar artifacts/demo-application/build/libs/demo-application-*.jar &
+          sleep 30
+
+      - name: Install performance testing tools
+        run: |
+          npm install -g artillery
+          sudo apt-get install -y apache2-utils
+
+      - name: Run performance tests
+        run: |
+          # Basic load testing with Apache Bench
+          ab -n 1000 -c 10 http://localhost:8080/api/v1/config/system
+          
+          # API load testing with Artillery
+          artillery quick --count 50 --num 10 http://localhost:8080/api/v1/backup/health
+
+      - name: Upload performance test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: performance-test-results
+          path: |
+            performance-results/
+
+  # End-to-End Tests
+  e2e-test:
+    name: End-to-End Testing
+    runs-on: ubuntu-latest
+    needs: [build]
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: noah_test_password
+          POSTGRES_DB: noah_backup_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: noah-backup-jar
+          path: ./artifacts
+
+      - name: Start Noah Backup application
+        env:
+          SPRING_PROFILES_ACTIVE: test
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/noah_backup_test
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: noah_test_password
+        run: |
+          java -jar artifacts/demo-application/build/libs/demo-application-*.jar &
+          sleep 45
+
+      - name: Run E2E tests
+        run: |
+          # Test authentication flow
+          TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"username":"admin","password":"admin123!"}' | \
+            jq -r '.token')
+          
+          # Test backup operations
+          curl -s -X POST http://localhost:8080/api/v1/backup/start \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json"
+          
+          # Test configuration endpoints
+          curl -s -X GET http://localhost:8080/api/v1/config \
+            -H "Authorization: Bearer $TOKEN"
+          
+          # Test reporting endpoints
+          curl -s -X GET http://localhost:8080/api/v1/reports/health \
+            -H "Authorization: Bearer $TOKEN"
+
+      - name: Verify application health
+        run: |
+          curl -f http://localhost:8080/actuator/health || exit 1
+
+  # Notification
+  notify:
+    name: Notification
+    runs-on: ubuntu-latest
+    needs: [security-scan, test, build, performance-test, e2e-test]
+    if: always()
+    
+    steps:
+      - name: Notify on success
+        if: needs.test.result == 'success' && needs.build.result == 'success'
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          channel: '#noah-backup-ci'
+          text: '✅ Noah Backup CI pipeline completed successfully!'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Notify on failure
+        if: contains(needs.*.result, 'failure')
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          channel: '#noah-backup-ci'
+          text: '❌ Noah Backup CI pipeline failed! Check the logs.'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

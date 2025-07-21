@@ -1,0 +1,148 @@
+# Noah Backup REST API Configuration
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  error:
+    include-message: always
+    include-binding-errors: always
+
+spring:
+  application:
+    name: noah-backup-api
+  profiles:
+    active: development
+    
+  # Jackson configuration for JSON responses
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+# Noah Backup API Configuration
+noah:
+  api:
+    # JWT Configuration
+    jwt:
+      secret: NoahBackupJWTSecretKey2024!ForSecureAPIAuthentication
+      expiration: 86400000  # 24 hours in milliseconds
+      refresh-expiration: 604800000  # 7 days in milliseconds
+    
+    # Security Configuration
+    security:
+      enabled: true
+      cors-enabled: true
+      rate-limiting-enabled: false  # Future enhancement
+      max-requests-per-hour: 1000
+    
+    # API Documentation
+    docs:
+      enabled: false  # Set to true to enable Swagger UI
+      title: "Noah Backup REST API"
+      description: "Enterprise backup solution with secure REST API"
+      version: "1.0.0"
+
+# Backup Configuration (inherited from scheduler-core)
+# This inherits the configuration from the scheduler module
+noah.backup:
+  enabled: true
+  weekly-enabled: true
+  timeout-minutes: 60
+  bucket: noah-backup-api
+  paths:
+    - "C:\\temp\\api-backup-test"
+  schedule:
+    daily: "0 0 2 * * ?"
+    weekly: "0 0 1 * * SUN"
+
+# Logging Configuration
+logging:
+  level:
+    com.noahbackup.api: INFO
+    org.springframework.security: INFO
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,scheduledtasks
+      cors:
+        allowed-origins: "http://localhost:3000,http://localhost:8081"
+        allowed-methods: GET,POST
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: when-authorized
+
+# Application Information
+info:
+  app:
+    name: Noah Backup REST API
+    description: Secure HTTP API for enterprise backup operations
+    version: 1.0.0
+  features:
+    - JWT Authentication
+    - Role-based Access Control
+    - Real-time Status Monitoring
+    - Configuration Management
+    - Scheduled Backup Control
+    - Health Monitoring
+  security:
+    authentication: JWT Bearer Token
+    authorization: Role-based (ADMIN, USER, VIEWER)
+    encryption: AES-256-GCM
+    cors: Enabled for development
+
+---
+# Development Profile
+spring:
+  config:
+    activate:
+      on-profile: development
+
+logging:
+  level:
+    com.noahbackup: DEBUG
+    org.springframework.security: DEBUG
+
+noah:
+  api:
+    security:
+      cors-enabled: true
+    docs:
+      enabled: true  # Enable API docs in development
+
+---
+# Production Profile
+spring:
+  config:
+    activate:
+      on-profile: production
+
+logging:
+  level:
+    com.noahbackup.api: INFO
+    org.springframework.security: WARN
+
+noah:
+  api:
+    jwt:
+      secret: ${JWT_SECRET:}  # Must be provided via environment variable
+    security:
+      cors-enabled: false  # Disable CORS in production
+      rate-limiting-enabled: true
+    docs:
+      enabled: false  # Disable API docs in production
+
+server:
+  port: ${PORT:8080}
+  servlet:
+    session:
+      timeout: 30m

@@ -1,0 +1,263 @@
+name: Noah Backup - Dependency Management
+
+on:
+  pull_request:
+    paths:
+      - '**/build.gradle.kts'
+      - 'gradle.properties'
+      - '.github/dependabot.yml'
+  schedule:
+    # Weekly dependency health check
+    - cron: '0 6 * * 1'  # Monday 6 AM UTC
+  workflow_dispatch:
+
+jobs:
+  # Auto-approve and merge low-risk dependency updates
+  dependency-auto-merge:
+    name: Auto-merge Dependencies
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v1
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Run security tests
+        run: |
+          ./gradlew build test --no-daemon
+          ./gradlew dependencyCheckAnalyze --no-daemon
+
+      - name: Auto-approve patch updates
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        run: |
+          gh pr review --approve "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Auto-merge patch updates
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        run: |
+          gh pr merge --auto --merge "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Label minor/major updates for review
+        if: steps.metadata.outputs.update-type == 'version-update:semver-minor' || steps.metadata.outputs.update-type == 'version-update:semver-major'
+        run: |
+          gh pr edit "$PR_URL" --add-label "needs-manual-review"
+          gh pr comment "$PR_URL" --body "🤖 This is a ${{ steps.metadata.outputs.update-type }} update that requires manual review before merging."
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Dependency vulnerability monitoring
+  dependency-vulnerability-check:
+    name: Vulnerability Monitoring
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Run comprehensive vulnerability scan
+        run: |
+          ./gradlew dependencyCheckAnalyze \
+            -Dorg.owasp.dependencycheck.nvdApiKey=${{ secrets.NVD_API_KEY }} \
+            -Dorg.owasp.dependencycheck.format=JSON
+
+      - name: Parse vulnerability results
+        run: |
+          # Extract high and critical vulnerabilities
+          CRITICAL_COUNT=$(jq '[.dependencies[]?.vulnerabilities[]? | select(.severity=="CRITICAL")] | length' build/reports/dependency-check-report.json)
+          HIGH_COUNT=$(jq '[.dependencies[]?.vulnerabilities[]? | select(.severity=="HIGH")] | length' build/reports/dependency-check-report.json)
+          
+          echo "Critical vulnerabilities: $CRITICAL_COUNT"
+          echo "High vulnerabilities: $HIGH_COUNT"
+          
+          # Create summary
+          jq -r '.dependencies[]?.vulnerabilities[]? | select(.severity=="CRITICAL" or .severity=="HIGH") | "- \(.severity): \(.name) (\(.source)) - \(.description)"' \
+            build/reports/dependency-check-report.json > vulnerability-summary.txt
+
+      - name: Create security issue if vulnerabilities found
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Read vulnerability summary
+            let summary = '';
+            try {
+              summary = fs.readFileSync('vulnerability-summary.txt', 'utf8');
+            } catch (e) {
+              console.log('No vulnerability summary file found');
+              return;
+            }
+            
+            if (summary.trim().length === 0) {
+              console.log('No critical or high vulnerabilities found');
+              return;
+            }
+            
+            // Check if there's already an open vulnerability issue
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'vulnerability,automated',
+              state: 'open'
+            });
+            
+            const issueTitle = '🚨 Weekly Dependency Vulnerability Report';
+            const existingIssue = issues.data.find(issue => issue.title === issueTitle);
+            
+            const body = `## Dependency Vulnerability Report
+            
+            **Scan Date**: ${new Date().toISOString()}
+            **Repository**: ${context.repo.owner}/${context.repo.repo}
+            
+            ### High and Critical Vulnerabilities Found:
+            
+            ${summary}
+            
+            ### Recommended Actions:
+            
+            1. Review the detailed vulnerability report in the workflow artifacts
+            2. Update affected dependencies to patched versions
+            3. If patches are not available, consider:
+               - Using alternative libraries
+               - Implementing additional security controls
+               - Accepting risk with proper documentation
+            4. Re-run vulnerability scan after fixes
+            
+            ### Automation:
+            
+            - This issue was automatically created by the dependency monitoring workflow
+            - The scan runs weekly and will update this issue with new findings
+            - The issue will be closed automatically when no vulnerabilities remain
+            
+            ### Workflow Run:
+            [View Details](${context.payload.repository.html_url}/actions/runs/${context.runId})
+            `;
+            
+            if (existingIssue) {
+              // Update existing issue
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: `## Updated Vulnerability Scan - ${new Date().toISOString()}\n\n${body}`
+              });
+            } else {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: issueTitle,
+                body: body,
+                labels: ['vulnerability', 'automated', 'security', 'dependencies']
+              });
+            }
+
+      - name: Upload vulnerability report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: dependency-vulnerability-report
+          path: |
+            build/reports/dependency-check-*
+            vulnerability-summary.txt
+
+  # Dependency license compliance check
+  license-compliance:
+    name: License Compliance Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Generate license report
+        run: |
+          ./gradlew generateLicenseReport
+
+      - name: Check for prohibited licenses
+        run: |
+          # Define prohibited licenses (adjust based on your organization's policy)
+          PROHIBITED_LICENSES=(
+            "GPL-2.0"
+            "GPL-3.0" 
+            "AGPL-3.0"
+            "SSPL-1.0"
+            "Commons Clause"
+          )
+          
+          # Check license report for prohibited licenses
+          LICENSE_VIOLATIONS=""
+          for license in "${PROHIBITED_LICENSES[@]}"; do
+            if grep -qi "$license" build/reports/dependency-license/index.html; then
+              LICENSE_VIOLATIONS="${LICENSE_VIOLATIONS}${license}, "
+            fi
+          done
+          
+          if [ ! -z "$LICENSE_VIOLATIONS" ]; then
+            echo "❌ Prohibited licenses detected: $LICENSE_VIOLATIONS"
+            echo "LICENSE_VIOLATIONS=$LICENSE_VIOLATIONS" >> $GITHUB_ENV
+            exit 1
+          else
+            echo "✅ No prohibited licenses detected"
+          fi
+
+      - name: Comment on PR with license status
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const violations = process.env.LICENSE_VIOLATIONS;
+            const status = violations ? '❌ License Compliance Failed' : '✅ License Compliance Passed';
+            const body = violations 
+              ? `${status}\n\nProhibited licenses detected: ${violations}\n\nPlease review and replace dependencies with prohibited licenses.`
+              : `${status}\n\nAll dependencies use approved licenses.`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 📄 License Compliance Check\n\n${body}`
+            });
+
+      - name: Upload license report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: license-compliance-report
+          path: build/reports/dependency-license/
