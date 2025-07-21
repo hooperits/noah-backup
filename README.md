@@ -1,9 +1,9 @@
 # 🚀 Noah Backup - Enterprise Backup Solution
 
-![Noah Backup Logo](Noah-Backup.png)
+<img src="Noah-Backup.png" alt="Noah Backup Logo" width="50%">
 
-[![CI/CD Pipeline](https://github.com/your-org/noah-backup/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/noah-backup/actions/workflows/ci.yml)
-[![Security Scan](https://github.com/your-org/noah-backup/actions/workflows/security-scan.yml/badge.svg)](https://github.com/your-org/noah-backup/actions/workflows/security-scan.yml)
+![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD-Pipeline-brightgreen?style=flat-square&logo=github-actions)
+![Security Scan](https://img.shields.io/badge/Security-Scan-blue?style=flat-square&logo=security)
 [![codecov](https://codecov.io/gh/your-org/noah-backup/branch/main/graph/badge.svg)](https://codecov.io/gh/your-org/noah-backup)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Docker Pulls](https://img.shields.io/docker/pulls/noahbackup/noah-backup)](https://hub.docker.com/r/noahbackup/noah-backup)
