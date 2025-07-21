@@ -1,6 +1,6 @@
 # 🚀 Noah Backup - Enterprise Backup Solution
 
-![Noah Backup Logo](docs/images/noah-backup-logo.png)
+![Noah Backup Logo](Noah-Backup.png)
 
 [![CI/CD Pipeline](https://github.com/your-org/noah-backup/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/noah-backup/actions/workflows/ci.yml)
 [![Security Scan](https://github.com/your-org/noah-backup/actions/workflows/security-scan.yml/badge.svg)](https://github.com/your-org/noah-backup/actions/workflows/security-scan.yml)
