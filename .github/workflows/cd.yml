@@ -148,7 +148,7 @@ jobs:
           kubeconfig: ${{ secrets.KUBE_CONFIG_STAGING }}
 
       - name: Deploy to Kubernetes
-        uses: azure/k8s-deploy@v1
+        uses: azure/k8s-deploy@v5
         with:
           manifests: |
             k8s/staging/namespace.yml
@@ -214,7 +214,7 @@ jobs:
             pg_dump -U noah_backup noah_backup > backup-$(date +%Y%m%d-%H%M%S).sql
 
       - name: Deploy to Production Kubernetes
-        uses: azure/k8s-deploy@v1
+        uses: azure/k8s-deploy@v5
         with:
           manifests: |
             k8s/production/namespace.yml
