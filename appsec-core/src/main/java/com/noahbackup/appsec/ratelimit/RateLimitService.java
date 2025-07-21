@@ -362,7 +362,7 @@ public class RateLimitService {
      * Get statistics about rate limiting for monitoring.
      */
     public Map<String, Object> getRateLimitStatistics() {
-        Map<String, Object> stats = new Map.of(
+        Map<String, Object> stats = Map.of(
             "enabled", rateLimitEnabled,
             "blocked_ips", blockedIPs.size(),
             "blocked_users", blockedUsers.size(),

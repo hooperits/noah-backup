@@ -39,7 +39,7 @@ public class BackupReportSummary {
     // File statistics
     private int totalFilesProcessed;
     private int successfulFiles;
-    private int failedFiles;
+    private int failedFilesCount;
     private long totalBytesProcessed;
     
     // Configuration at time of backup
@@ -103,8 +103,8 @@ public class BackupReportSummary {
             return this;
         }
         
-        public Builder failedFiles(int failedFiles) {
-            summary.failedFiles = failedFiles;
+        public Builder failedFilesCount(int failedFilesCount) {
+            summary.failedFilesCount = failedFilesCount;
             return this;
         }
         
@@ -177,8 +177,8 @@ public class BackupReportSummary {
     public int getSuccessfulFiles() { return successfulFiles; }
     public void setSuccessfulFiles(int successfulFiles) { this.successfulFiles = successfulFiles; }
     
-    public int getFailedFiles() { return failedFiles; }
-    public void setFailedFiles(int failedFiles) { this.failedFiles = failedFiles; }
+    public int getFailedFilesCount() { return failedFilesCount; }
+    public void setFailedFilesCount(int failedFilesCount) { this.failedFilesCount = failedFilesCount; }
     
     public long getTotalBytesProcessed() { return totalBytesProcessed; }
     public void setTotalBytesProcessed(long totalBytesProcessed) { this.totalBytesProcessed = totalBytesProcessed; }

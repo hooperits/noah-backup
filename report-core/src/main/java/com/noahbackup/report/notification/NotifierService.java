@@ -292,7 +292,7 @@ public class NotifierService {
         message.append("**File Processing:**\n");
         message.append("- Total Files: ").append(summary.getTotalFilesProcessed()).append("\n");
         message.append("- Successful: ").append(summary.getSuccessfulFiles()).append("\n");
-        message.append("- Failed: ").append(summary.getFailedFiles()).append("\n");
+        message.append("- Failed: ").append(summary.getFailedFilesCount()).append("\n");
         message.append("- Success Rate: ").append(String.format("%.1f%%", summary.getSuccessRate())).append("\n");
         message.append("- Data Processed: ").append(summary.getFileSizeFormatted()).append("\n\n");
         

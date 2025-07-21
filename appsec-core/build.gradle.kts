@@ -1,7 +1,12 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.1.5"
     id("io.spring.dependency-management") version "1.1.3"
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.boot:spring-boot-dependencies:3.1.5")
+    }
 }
 
 dependencies {

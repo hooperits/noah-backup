@@ -57,7 +57,7 @@ public class SecureCodingUtils {
     /**
      * Masks sensitive data in strings to prevent accidental exposure in logs.
      */
-    private static String maskSensitiveData(Object obj) {
+    public static String maskSensitiveData(Object obj) {
         if (obj == null) return "null";
         
         String str = obj.toString();
