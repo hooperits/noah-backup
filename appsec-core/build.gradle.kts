@@ -1,6 +1,6 @@
 plugins {
     java
-    id("io.spring.dependency-management") version "1.1.3"
+    id("io.spring.dependency-management") version "1.1.7"
 }
 
 dependencyManagement {
