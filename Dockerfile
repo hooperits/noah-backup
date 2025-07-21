@@ -2,7 +2,7 @@
 # Production-ready container with security hardening
 
 # Build stage
-FROM eclipse-temurin:17-jdk-alpine AS builder
+FROM eclipse-temurin:21-jdk-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache \
@@ -41,7 +41,7 @@ RUN ./gradlew clean build -x test --no-daemon && \
     ./gradlew bootJar --no-daemon
 
 # Runtime stage
-FROM eclipse-temurin:17-jre-alpine AS runtime
+FROM eclipse-temurin:21-jre-alpine AS runtime
 
 # Security: Create non-root user
 RUN addgroup -g 1001 noahbackup && \
