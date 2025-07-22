@@ -1,0 +1,160 @@
+version: '3.8'
+
+services:
+  # Noah Backup Scheduler Service
+  noah-scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: scheduler
+    container_name: noah-backup-scheduler
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-development}
+      - NOAH_ENV=${NOAH_ENV:-development}
+      - SERVER_PORT=8080
+    ports:
+      - "${SCHEDULER_PORT:-8080}:8080"
+    volumes:
+      - ./logs:/app/logs
+      - ./config:/app/config:ro
+      - backup-data:/app/backup-temp
+    depends_on:
+      - minio
+    networks:
+      - noah-backup-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Noah Backup REST API Service
+  noah-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    container_name: noah-backup-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-development}
+      - NOAH_ENV=${NOAH_ENV:-development}
+      - SERVER_PORT=8081
+    ports:
+      - "${API_PORT:-8081}:8081"
+    volumes:
+      - ./logs:/app/logs
+      - ./config:/app/config:ro
+    depends_on:
+      - minio
+    networks:
+      - noah-backup-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # MinIO S3-Compatible Storage (for development/testing)
+  minio:
+    image: minio/minio:latest
+    container_name: noah-backup-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin123}
+      - MINIO_REGION=${AWS_REGION:-us-east-1}
+    ports:
+      - "${MINIO_PORT:-9000}:9000"      # MinIO API
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"  # MinIO Console
+    volumes:
+      - minio-data:/data
+    networks:
+      - noah-backup-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # MinIO Client - Auto-create buckets
+  minio-setup:
+    image: minio/mc:latest
+    container_name: noah-backup-minio-setup
+    depends_on:
+      - minio
+    volumes:
+      - ./scripts/minio-setup.sh:/setup.sh:ro
+    environment:
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin123}
+      - BUCKET_NAME=${S3_BUCKET_NAME:-noah-backup-storage}
+    networks:
+      - noah-backup-network
+    entrypoint: /bin/sh
+    command: -c "sleep 10 && /setup.sh"
+
+  # Prometheus (optional monitoring)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: noah-backup-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - noah-backup-network
+    profiles:
+      - monitoring
+
+  # Grafana (optional monitoring)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: noah-backup-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - noah-backup-network
+    profiles:
+      - monitoring
+
+networks:
+  noah-backup-network:
+    driver: bridge
+    name: noah-backup-network
+
+volumes:
+  minio-data:
+    name: noah-backup-minio-data
+  backup-data:
+    name: noah-backup-temp-data
+  prometheus-data:
+    name: noah-backup-prometheus-data
+  grafana-data:
+    name: noah-backup-grafana-data
