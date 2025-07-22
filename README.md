@@ -2833,8 +2833,6 @@ Noah Backup provides multiple support channels to help you successfully deploy, 
 ### Documentation Resources
 
 #### Primary Documentation
-- **Official Documentation**: [https://docs.noah-backup.com](https://docs.noah-backup.com)
-- **API Reference**: [https://api-docs.noah-backup.com](https://api-docs.noah-backup.com)
 - **Installation Guide**: [Installation Documentation](docs/installation.md)
 - **Configuration Guide**: [Configuration Documentation](docs/configuration.md)
 - **Security Guide**: [Security Documentation](docs/security.md)
@@ -2850,11 +2848,9 @@ Noah Backup provides multiple support channels to help you successfully deploy, 
 ### Community Support
 
 #### GitHub Community
-- **GitHub Issues**: [Report bugs and request features](https://github.com/your-org/noah-backup/issues)
-- **GitHub Discussions**: [Community Q&A and general discussions](https://github.com/your-org/noah-backup/discussions)
-- **GitHub Wiki**: [Community-contributed guides and examples](https://github.com/your-org/noah-backup/wiki)
-
-### Professional Support
+- **GitHub Issues**: [Report bugs and request features](https://github.com/hooperits/noah-backup/issues)
+- **GitHub Discussions**: [Community Q&A and general discussions](https://github.com/hooperits/noah-backup/discussions)
+- **GitHub Wiki**: [Community-contributed guides and examples](https://github.com/hooperits/noah-backup/wiki)
 
 #### Support Tiers
 
@@ -2863,8 +2859,6 @@ Noah Backup provides multiple support channels to help you successfully deploy, 
 - Community documentation
 - Best-effort response from community
 - Self-service troubleshooting guides
-
-### Support Contacts
 
 ### Self-Service Resources
 
