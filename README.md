@@ -291,37 +291,6 @@ docker run -d \
   noahbackup/noah-backup:latest
 ```
 
-#### Method 3: Package Manager Installation
-
-**Ubuntu/Debian:**
-```bash
-# Add repository
-wget -qO - https://packages.noah-backup.com/gpg.key | sudo apt-key add -
-echo "deb https://packages.noah-backup.com/ubuntu focal main" | sudo tee /etc/apt/sources.list.d/noah-backup.list
-
-# Install
-sudo apt update
-sudo apt install noah-backup
-```
-
-**RHEL/CentOS:**
-```bash
-# Add repository
-sudo yum install -y https://packages.noah-backup.com/rhel/noah-backup-release.rpm
-
-# Install
-sudo yum install noah-backup
-```
-
-**Windows (Chocolatey):**
-```powershell
-# Install via Chocolatey
-choco install noah-backup
-
-# Or use Windows Installer
-# Download from: https://github.com/your-org/noah-backup/releases/latest
-```
-
 ### Service Installation
 
 #### Linux (systemd)
