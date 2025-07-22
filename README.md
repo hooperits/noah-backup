@@ -1477,34 +1477,6 @@ noah:
       block-on-threat: false
 ```
 
-### Security Testing
-
-#### Automated Security Testing
-- **Unit Tests**: Input validation, encryption, auth logic
-- **Integration Tests**: End-to-end security flows
-- **Regression Tests**: OWASP Top 10 test cases
-- **Penetration Testing**: Quarterly security assessments
-
-#### Vulnerability Management
-- **Daily Scans**: Dependency and container vulnerabilities
-- **CI/CD Integration**: SAST, DAST, dependency checking
-- **Response SLAs**: Critical (24h), High (7d), Medium (30d)
-
-### Incident Response
-
-#### Security Incident Process
-1. **Detection**: Automated monitoring alerts
-2. **Analysis**: Security team assessment
-3. **Containment**: Isolate affected systems
-4. **Eradication**: Remove threats and fix vulnerabilities
-5. **Recovery**: Restore normal operations
-6. **Lessons Learned**: Update security controls
-
-#### Emergency Contacts
-- **Security Team**: security@noah-backup.com
-- **24/7 Hotline**: +1-555-SECURITY
-- **Incident Reports**: security-incidents@noah-backup.com
-
 ### Compliance Certifications
 
 #### Supported Frameworks
@@ -2764,47 +2736,6 @@ Brief description of changes made.
 4. **Maintainability**: Is the code readable and maintainable?
 5. **Testing**: Are adequate tests included?
 
-**Review Timeline:**
-- **Initial Review**: Within 2 business days
-- **Follow-up Reviews**: Within 1 business day
-- **Merge**: After approval from 2+ maintainers
-
-### Bug Reports
-
-#### Bug Report Template
-
-```markdown
-**Bug Description**
-A clear description of the bug.
-
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
-
-**Expected Behavior**
-What you expected to happen.
-
-**Actual Behavior**
-What actually happened.
-
-**Environment**
-- OS: [e.g., Windows 10, Ubuntu 20.04]
-- Java Version: [e.g., OpenJDK 17.0.2]
-- Noah Backup Version: [e.g., 1.0.0]
-- Deployment Method: [e.g., JAR, Docker, Kubernetes]
-
-**Logs**
-```
-Include relevant log snippets here
-```
-
-**Additional Context**
-Any other information about the problem.
-```
-
 ### Feature Requests
 
 #### Feature Request Template
@@ -2845,7 +2776,7 @@ We are committed to providing a welcoming and inclusive environment:
 - **GitHub Issues**: Bug reports and feature requests
 - **GitHub Discussions**: General questions and community discussion
 - **Pull Requests**: Code contributions and reviews
-- **Security Issues**: security@noah-backup.com (private)
+- **Security Issues**: noah-backup@hooperits.com (private)
 
 #### Recognition
 
@@ -2892,15 +2823,6 @@ We follow Semantic Versioning (SemVer):
 - **Examples**: Sample implementations and tutorials
 - **Community**: Connect with other contributors
 
-#### Mentorship
-
-New contributors can request mentorship:
-- **Getting Started**: Help with initial setup
-- **Code Review**: Guidance on coding standards
-- **Best Practices**: Learn project-specific practices
-- **Career Development**: Open source contribution guidance
-
-Thank you for contributing to Noah Backup! Your efforts help make enterprise backup solutions more secure and reliable for everyone.
 
 ## 📞 Support
 
@@ -2932,23 +2854,6 @@ Noah Backup provides multiple support channels to help you successfully deploy, 
 - **GitHub Discussions**: [Community Q&A and general discussions](https://github.com/your-org/noah-backup/discussions)
 - **GitHub Wiki**: [Community-contributed guides and examples](https://github.com/your-org/noah-backup/wiki)
 
-#### Communication Channels
-- **Slack Community**: [Join our Slack workspace](https://slack.noah-backup.com)
-  - `#general`: General discussions
-  - `#support`: Technical support questions
-  - `#announcements`: Release and security announcements
-  - `#development`: Development and contribution discussions
-
-- **Discord Server**: [Join our Discord](https://discord.gg/noah-backup)
-  - Real-time chat support
-  - Voice channels for complex troubleshooting
-  - Community events and office hours
-
-#### Community Forums
-- **Reddit Community**: [r/NoahBackup](https://reddit.com/r/noahbackup)
-- **Stack Overflow**: Use tag `noah-backup` for questions
-- **Hacker News**: Follow for updates and discussions
-
 ### Professional Support
 
 #### Support Tiers
@@ -2959,75 +2864,7 @@ Noah Backup provides multiple support channels to help you successfully deploy, 
 - Best-effort response from community
 - Self-service troubleshooting guides
 
-**Professional Support**
-- **Response Time**: 2 business days
-- **Coverage**: Business hours (9 AM - 5 PM EST)
-- **Channels**: Email and ticketing system
-- **Scope**: Installation, configuration, and usage questions
-- **Price**: $199/month per organization
-
-**Enterprise Support**
-- **Response Time**: 4 hours for critical issues
-- **Coverage**: 24/7 for production issues
-- **Channels**: Email, phone, and dedicated Slack channel
-- **Scope**: Full technical support including custom configurations
-- **Extras**: Health checks, optimization reviews, priority feature requests
-- **Price**: $999/month per organization
-
-**Premium Support**
-- **Response Time**: 1 hour for critical issues
-- **Coverage**: 24/7 worldwide support
-- **Channels**: All channels plus video calls and screen sharing
-- **Scope**: Complete support including development assistance
-- **Extras**: Dedicated support engineer, quarterly reviews, custom integrations
-- **Price**: Custom pricing based on requirements
-
-#### Enterprise Services
-
-**Professional Services**
-- **Implementation Services**: Full setup and configuration
-- **Migration Services**: Migrate from existing backup solutions
-- **Integration Services**: Custom integrations with existing systems
-- **Training Services**: On-site or remote training for your team
-- **Consultation Services**: Architecture review and optimization
-
-**Managed Services**
-- **Fully Managed**: Complete backup solution management
-- **Monitoring & Alerting**: 24/7 monitoring with proactive alerts
-- **Maintenance**: Regular updates, patching, and optimization
-- **Compliance**: Compliance reporting and audit support
-
 ### Support Contacts
-
-#### General Support
-- **Email**: support@noah-backup.com
-- **Response Time**: 2-4 business days
-- **Hours**: Monday-Friday, 9 AM - 5 PM EST
-
-#### Technical Support
-- **Email**: technical@noah-backup.com
-- **Phone**: +1-555-NOAH-TECH (+1-555-662-4832)
-- **Hours**: Business hours for Professional/Enterprise customers
-
-#### Security Issues
-- **Email**: security@noah-backup.com
-- **PGP Key**: [Download public key](https://noah-backup.com/pgp-key.asc)
-- **Response Time**: 24 hours for security vulnerabilities
-- **Severity Levels**:
-  - **Critical**: 4 hours
-  - **High**: 24 hours  
-  - **Medium**: 72 hours
-  - **Low**: 1 week
-
-#### Emergency Support
-- **24/7 Hotline**: +1-555-NOAH-911 (Enterprise+ customers only)
-- **Emergency Email**: emergency@noah-backup.com
-- **Escalation**: For production-down scenarios
-
-#### Sales and Licensing
-- **Sales Team**: sales@noah-backup.com
-- **Phone**: +1-555-NOAH-SALE
-- **Licensing**: licensing@noah-backup.com
 
 ### Self-Service Resources
 
@@ -3155,100 +2992,11 @@ What would make this feature complete?
 High/Medium/Low and justification.
 ```
 
-#### Feature Request Process
-
-**1. Community Review** (1-2 weeks)
-- Community discussion and feedback
-- Use case validation
-- Technical feasibility assessment
-
-**2. Team Review** (2-4 weeks)  
-- Product team evaluation
-- Technical review and estimation
-- Roadmap planning
-
-**3. Implementation** (varies)
-- Development planning
-- Implementation and testing
-- Documentation and release
-
-#### Roadmap and Prioritization
-
-**Release Planning**
-- **Next Release**: Features in active development
-- **Upcoming Releases**: Planned features for next 2-3 releases
-- **Future**: Long-term vision and major features
-
-**Prioritization Criteria**
-- User impact and demand
-- Security and compliance requirements
-- Technical complexity and dependencies
-- Resource availability
-- Strategic alignment
-
-### Bug Reporting
-
-#### Bug Report Guidelines
-
-**Before Reporting:**
-- Search existing issues
-- Verify with latest version
-- Test in minimal environment
-- Gather relevant information
-
-**Required Information:**
-- Clear bug description
-- Steps to reproduce
-- Expected vs actual behavior
-- Environment details
-- Log files and error messages
-- Screenshots or videos (if applicable)
-
-**Bug Severity Levels:**
-- **Critical**: System down, data loss, security vulnerability
-- **High**: Major functionality broken, significant impact
-- **Medium**: Feature not working as expected, workaround available
-- **Low**: Minor issue, cosmetic problem
-
-#### Bug Response Times
-
-| Severity | Response Time | Resolution Target |
-|----------|---------------|-------------------|
-| Critical | 2 hours | 24 hours |
-| High | 8 hours | 72 hours |
-| Medium | 2 business days | 2 weeks |
-| Low | 1 week | Next minor release |
-
-### Training and Education
-
 #### Documentation and Guides
 - **Administrator Guide**: Complete system administration
 - **User Guide**: End-user functionality and workflows
 - **Developer Guide**: API usage and integration
 - **Security Guide**: Security best practices and configuration
-
-#### Training Options
-
-**Self-Paced Learning**
-- **Online Documentation**: Comprehensive guides and tutorials
-- **Video Tutorials**: Step-by-step implementation videos
-- **Webinar Recordings**: Past training sessions and demos
-- **Sample Configurations**: Real-world configuration examples
-
-**Instructor-Led Training**
-- **Virtual Training**: Remote training sessions
-- **On-Site Training**: At your location (Enterprise customers)
-- **Certification Programs**: Noah Backup Administrator certification
-- **Custom Training**: Tailored to your specific environment
-
-**Training Topics**
-- Installation and initial setup
-- Configuration and customization
-- Security hardening
-- Performance optimization
-- Troubleshooting and maintenance
-- API development and integration
-- Monitoring and alerting
 
 ### Service Level Agreements (SLA)
 
@@ -3256,21 +3004,9 @@ High/Medium/Low and justification.
 
 **Response Times:**
 - **Community**: Best effort, no guaranteed response time
-- **Professional**: 2 business days for all issues
-- **Enterprise**: 4 hours for critical, 8 hours for high, 1 business day for medium/low
-- **Premium**: 1 hour for critical, 4 hours for high, 8 hours for medium, 1 business day for low
 
 **Availability:**
 - **Community**: No availability guarantee
-- **Professional**: Business hours (9 AM - 5 PM EST, Monday-Friday)
-- **Enterprise**: 24/7 for critical issues, business hours for others
-- **Premium**: 24/7 for all issues
-
-**Escalation:**
-- **Level 1**: Front-line support technicians
-- **Level 2**: Senior support engineers
-- **Level 3**: Development team and architects
-- **Emergency**: Direct access to on-call engineers (Enterprise+ only)
 
 ### Legal and Compliance
 
@@ -3279,25 +3015,6 @@ Your privacy is important to us. We collect minimal information necessary to pro
 - Contact information for communication
 - Technical details for troubleshooting
 - Usage patterns for product improvement
-
-#### Data Handling
-- Support data is kept confidential
-- Information shared only with relevant team members
-- Data retention based on support tier and legal requirements
-- Optional data sharing agreements for enhanced support
-
-#### Terms of Service
-- Support is provided under our Terms of Service
-- Professional and Enterprise support includes additional SLAs
-- Emergency support available for production-critical issues
-- Custom support agreements available for enterprise customers
-
----
-
-**Need immediate assistance?** 
-- 🚨 **Emergency Support**: emergency@noah-backup.com
-- 💬 **Live Chat**: [Available on our website](https://noah-backup.com/support)
-- 📞 **Phone Support**: +1-555-NOAH-HELP
 
 ## 📄 License
 

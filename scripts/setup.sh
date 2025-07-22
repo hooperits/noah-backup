@@ -30,19 +30,19 @@ prompt_input() {
     local value
     
     if [ "$is_secret" == "true" ]; then
-        echo -ne "${YELLOW}$prompt${NC}"
+        echo -ne "${YELLOW}$prompt${NC}" >&2
         if [ -n "$default" ]; then
-            echo -ne " ${CYAN}[default: ***hidden***]${NC}"
+            echo -ne " ${CYAN}[default: ***hidden***]${NC}" >&2
         fi
-        echo -ne ": "
+        echo -ne ": " >&2
         read -s value
-        echo ""
+        echo "" >&2
     else
-        echo -ne "${YELLOW}$prompt${NC}"
+        echo -ne "${YELLOW}$prompt${NC}" >&2
         if [ -n "$default" ]; then
-            echo -ne " ${CYAN}[default: $default]${NC}"
+            echo -ne " ${CYAN}[default: $default]${NC}" >&2
         fi
-        echo -ne ": "
+        echo -ne ": " >&2
         read value
     fi
     
@@ -60,11 +60,11 @@ prompt_yes_no() {
     local response
     
     while true; do
-        echo -ne "${YELLOW}$prompt${NC}"
+        echo -ne "${YELLOW}$prompt${NC}" >&2
         if [ "$default" == "y" ]; then
-            echo -ne " ${CYAN}[Y/n]${NC}: "
+            echo -ne " ${CYAN}[Y/n]${NC}: " >&2
         else
-            echo -ne " ${CYAN}[y/N]${NC}: "
+            echo -ne " ${CYAN}[y/N]${NC}: " >&2
         fi
         read response
         
@@ -82,7 +82,7 @@ prompt_yes_no() {
                 return
                 ;;
             *)
-                echo -e "${RED}Please answer yes or no.${NC}"
+                echo -e "${RED}Please answer yes or no.${NC}" >&2
                 ;;
         esac
     done
