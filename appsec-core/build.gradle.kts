@@ -26,7 +26,7 @@ dependencies {
     // Input validation and sanitization
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.owasp.encoder:encoder:1.2.3")
-    implementation("org.apache.commons:commons-lang3:3.13.0")
+    implementation("org.apache.commons:commons-lang3:3.18.0")
     
     // Security monitoring and metrics
     implementation("io.micrometer:micrometer-core")
