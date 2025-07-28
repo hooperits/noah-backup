@@ -1,7 +1,7 @@
 plugins {
     java
     application
-    id("org.springframework.boot") version "3.5.3"
+    id("org.springframework.boot") version "3.5.4"
     id("io.spring.dependency-management") version "1.1.4"
 }
 
@@ -17,7 +17,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     
     // CLI support
-    implementation("org.springframework.shell:spring-shell-starter:3.1.5")
+    implementation("org.springframework.shell:spring-shell-starter:3.4.0")
     
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
