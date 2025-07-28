@@ -17,7 +17,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-configuration-processor")
     
     // Rate limiting and throttling
-    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
+    implementation("com.github.ben-manes.caffeine:caffeine:3.2.2")
     implementation("org.springframework.boot:spring-boot-starter-data-redis") {
         exclude(group = "redis.clients", module = "jedis")
     }
